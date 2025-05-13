@@ -85,7 +85,7 @@ def preprocess_dataset(input_path: str, output_dir: str) -> Tuple[pd.DataFrame, 
     return df, cleaned_path
 
 if __name__ == "__main__":
-    input_file = "../dataset_raw/Sleep_health_and_lifestyle_dataset.csv"
+    input_file = "dataset_raw/Sleep_health_and_lifestyle_dataset.csv"
     output_dir = "preprocessing/outputs"
 
     mlflow.set_tracking_uri("file:./mlruns")
