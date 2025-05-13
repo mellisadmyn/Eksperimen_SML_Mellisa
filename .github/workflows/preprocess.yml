@@ -31,7 +31,8 @@ jobs:
         python preprocessing/automate_Mellisa.py
 
     - name: Upload Cleaned Dataset
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: processed-dataset
         path: preprocessing/outputs/
+
