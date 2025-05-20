@@ -1,0 +1,38 @@
+name: Preprocess Dataset
+
+on:
+  push:
+    paths:
+      - 'preprocessing/automate_Mellisa.py'
+      - 'dataset_raw/Sleep_health_and_lifestyle_dataset.csv'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+jobs:
+  preprocessing:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas scikit-learn mlflow==2.19.0
+
+    - name: Run Preprocessing Script
+      run: |
+        python preprocessing/automate_Mellisa.py
+
+    - name: Upload Cleaned Dataset
+      uses: actions/upload-artifact@v4
+      with:
+        name: processed-dataset
+        path: preprocessing/outputs/
+
