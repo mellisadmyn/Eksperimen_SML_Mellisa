@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/melli/Dropbox/Dicoding/SMSML_Mellisa/Eksperimen_SML_Mellisa/mlruns/0/534c64de439e46b3a02850f29fab208f/artifacts
+end_time: 1747755340723
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 534c64de439e46b3a02850f29fab208f
+run_name: Preprocessing_Run
+run_uuid: 534c64de439e46b3a02850f29fab208f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747755340593
+status: 3
+tags: []
+user_id: melli
