@@ -1,8 +1,9 @@
-import pandas as pd
 import os
 import pickle
 import mlflow
+import pandas as pd
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from sklearn.model_selection import train_test_split
 from typing import Tuple
 
 def categorize_blood_pressure(systolic: int, diastolic: int) -> str:
@@ -19,7 +20,8 @@ def categorize_blood_pressure(systolic: int, diastolic: int) -> str:
     else:
         return "Hypertensive Crisis"
 
-def preprocess_dataset(input_path: str, output_dir: str) -> Tuple[pd.DataFrame, str]:
+
+def preprocess_dataset(input_path: str, output_dir: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     df = pd.read_csv(input_path)
 
     # 5.1 Rename columns
@@ -72,17 +74,25 @@ def preprocess_dataset(input_path: str, output_dir: str) -> Tuple[pd.DataFrame, 
         df[col] = label_encoder.fit_transform(df[col])
         label_mappings[col] = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
 
-    # Simpan hasil encoding
+    # 5.10 Train-test dataset split
+    X = df.drop(columns=['sleep_disorder'])
+    y = df['sleep_disorder']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+    # Simpan hasil split
     os.makedirs(output_dir, exist_ok=True)
+    X_train.to_csv(os.path.join(output_dir, 'X_train.csv'), index=False)
+    X_test.to_csv(os.path.join(output_dir, 'X_test.csv'), index=False)
+    y_train.to_csv(os.path.join(output_dir, 'y_train.csv'), index=False)
+    y_test.to_csv(os.path.join(output_dir, 'y_test.csv'), index=False)
+
+    # Simpan hasil encoding
     mapping_path = os.path.join(output_dir, 'label_mappings.pkl')
     with open(mapping_path, 'wb') as f:
         pickle.dump(label_mappings, f)
 
-    # Simpan data bersih
-    cleaned_path = os.path.join(output_dir, 'clean_sleep_health_and_lifestyle_dataset.csv')
-    df.to_csv(cleaned_path, index=False)
+    return df, X_train, X_test, y_train, y_test
 
-    return df, cleaned_path
 
 if __name__ == "__main__":
     input_file = "dataset_raw/Sleep_health_and_lifestyle_dataset.csv"
@@ -91,11 +101,14 @@ if __name__ == "__main__":
     mlflow.set_tracking_uri("file:./mlruns")
 
     with mlflow.start_run(run_name="Preprocessing_Run"):
-        df_clean, cleaned_path = preprocess_dataset(input_file, output_dir)
+        df_clean, X_train, X_test, y_train, y_test = preprocess_dataset(input_file, output_dir)
 
         mlflow.log_param("input_file", input_file)
         mlflow.log_param("output_dir", output_dir)
         mlflow.log_metric("rows_after_cleaning", df_clean.shape[0])
 
-        mlflow.log_artifact(cleaned_path)
+        mlflow.log_artifact(os.path.join(output_dir, 'X_train.csv'))
+        mlflow.log_artifact(os.path.join(output_dir, 'X_test.csv'))
+        mlflow.log_artifact(os.path.join(output_dir, 'y_train.csv'))
+        mlflow.log_artifact(os.path.join(output_dir, 'y_test.csv'))
         mlflow.log_artifact(os.path.join(output_dir, 'label_mappings.pkl'))
